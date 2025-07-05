@@ -3,8 +3,10 @@ import streamlit as st
 import pandas as pd
 
 def buscar_factura(row, fact_df):
+    descripcion = str(row["Descripción"]) if pd.notnull(row["Descripción"]) else ""
     for _, f in fact_df.iterrows():
-        if str(f["Nro Factura"]) in row["Descripción"] and abs(f["Monto"] - row["Monto"]) < 0.01:
+        nro_factura_str = str(f["Nro Factura"])
+        if nro_factura_str in descripcion and abs(f["Monto"] - row["Monto"]) <= 0.01:
             return f["Nro Factura"]
     return None
 
