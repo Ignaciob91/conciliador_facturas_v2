@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 
@@ -6,7 +5,7 @@ def buscar_factura(row, fact_df):
     descripcion = str(row["Descripción"]) if pd.notnull(row["Descripción"]) else ""
     for _, f in fact_df.iterrows():
         nro_factura_str = str(f["Nro Factura"])
-        if nro_factura_str in descripcion and abs(f["Monto"] - row["Monto"]) <= 0.01:
+        if nro_factura_str in descripcion and abs(float(f["Monto"]) - float(row["Monto"])) <= 0.01:
             return f["Nro Factura"]
     return None
 
@@ -18,6 +17,10 @@ pagos_file = st.file_uploader("🏦 Subí archivo de pagos (.xlsx o .csv)", type
 if facturas_file and pagos_file:
     facturas = pd.read_excel(facturas_file)
     pagos = pd.read_csv(pagos_file) if pagos_file.name.endswith(".csv") else pd.read_excel(pagos_file)
+
+    # 👇 Convertir a float de forma explícita
+    facturas["Monto"] = pd.to_numeric(facturas["Monto"], errors="coerce")
+    pagos["Monto"] = pd.to_numeric(pagos["Monto"], errors="coerce")
 
     pagos["Factura Relacionada"] = pagos.apply(buscar_factura, axis=1, fact_df=facturas)
     facturas["Estado"] = facturas["Nro Factura"].apply(
